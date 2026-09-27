@@ -1,260 +1,126 @@
-\# Scalable Entity Resolution using XGBoost
-
-
-
-A scalable machine learning pipeline for entity resolution and record linkage across large business datasets.
-
-
-
-\## Overview
-
-
-
-The project matches entities from Source 1 against entities from Source 2 and Source 3 despite variations in:
-
-
-
-\- Business names
-
-\- Addresses
-
-\- Country information
-
-\- Spelling and typographical errors
-
-\- Word ordering
-
-\- Missing or additional information
-
-
-
-The pipeline combines multi-pass candidate generation, fuzzy string similarity, feature engineering and XGBoost classification.
-
-
-
-\## Dataset Scale
-
-
-
-\### Training
-
-
-
-\- Source 1: 2,206,821 records
-
-\- Source 2: 5,034,616 records
-
-\- Source 3: 5,285,603 records
-
-\- Target pool: 10,320,219 entities
-
-
-
-\### Test
-
-
-
-\- Source 1: 1,732,544 records
-
-\- Source 2: 4,887,273 records
-
-\- Source 3: 5,082,316 records
-
-\- Target pool: 9,969,589 entities
-
-
-
-\## Approach
-
-
-
-\### 1. Data Cleaning
-
-
-
-Records are normalized using:
-
-
-
-\- Lowercasing
-
-\- Punctuation normalization
-
-\- Whitespace normalization
-
-\- Corporate abbreviation normalization
-
-\- Address abbreviation normalization
-
-\- Missing-value handling
-
-
-
-\### 2. Candidate Generation
-
-
-
-A multi-pass candidate-generation strategy reduces the search space before machine learning.
-
-
-
-The final TEST candidate set contained:
-
-
-
-\- 1,732,544 Source 1 entities
-
-\- 51,810,001 candidate IDs
-
-
-
-This represents approximately a 99.7% reduction compared with brute-force comparison against the complete target pool.
-
-
-
-\### 3. Feature Engineering
-
-
-
-The model uses 11 features:
-
-
-
-\- Name ratio
-
-\- Name token sort similarity
-
-\- Name token set similarity
-
-\- Name partial similarity
-
-\- Address ratio
-
-\- Address token set similarity
-
-\- Address partial similarity
-
-\- Country match
-
-\- Missing address indicator
-
-\- Name length difference
-
-\- Address length difference
-
-
-
-\### 4. Machine Learning
-
-
-
-An XGBoost classifier is used to predict whether a candidate pair represents the same entity.
-
-
-
-\## Validation Results
-
-
-
-The final source-level held-out validation produced:
-
-
-
-| Metric | Result |
-
-|---|---:|
-
-| Precision | 99.19% |
-
-| Recall | 89.14% |
-
-| F0.5 | 0.9700 |
-
-
-
-The best tuned model achieved PR-AUC of approximately 0.997.
-
-
-
-\## Final Test Inference
-
-
-
-The final inference processed:
-
-
-
-\- 1,732,544 Source 1 entities
-
-\- 48,594,924 candidate pairs scored
-
-\- 50,283,577 predicted links
-
-
-
-Structural validation produced:
-
-
-
-\- Invalid target IDs: 0
-
-\- Duplicate target IDs: 0
-
-\- Duplicate Source 1 IDs: 0
-
-
-
-\## Output
-
-
-
-The challenge submission consists of:
-
-
-
-\- `matching\_results.tsv`
-
-\- `candidate\_pairs.tsv`
-
-
-
-These large files are intentionally excluded from GitHub.
-
-
-
-\## Model
-
-
-
-The trained XGBoost model is stored locally as:
-
-
-
-`output/xgb\_best\_v2.json`
-
-
-
-The selected inference threshold is:
-
-
-
-`output/best\_threshold\_v2.txt`
-
-
-
-\## Reproducibility
-
-
-
-Large datasets and generated submission files are excluded from this repository because of their size.
-
-
-
-Place the required datasets in the expected local directories and install dependencies with:
-
-
-
-```bash
-
-pip install -r requirements.txt
-
+# Scalable Entity Resolution with XGBoost
+
+A scalable machine learning pipeline for resolving and matching business entities across large, noisy datasets using multi-pass candidate generation, fuzzy matching, feature engineering, and XGBoost classification.
+
+## 🚀 Overview
+
+Entity resolution is the process of identifying records that refer to the same real-world entity, even when business names, addresses, or other attributes contain spelling variations, abbreviations, formatting differences, or missing information.
+
+This project uses a **Candidate Generation → Feature Engineering → XGBoost → Matching** pipeline to efficiently perform entity resolution at large scale.
+
+## 🔄 Pipeline
+
+Raw Data
+   ↓
+Data Cleaning & Normalization
+   ↓
+Multi-Pass Candidate Generation
+   ↓
+Similarity Feature Engineering
+   ↓
+XGBoost Classification
+   ↓
+Threshold-Based Matching
+   ↓
+Validated Output
+📊 Scale
+
+The pipeline was developed for millions of business records:
+
+Dataset	Records
+TRAIN Source 1	2.20M
+TRAIN Source 2	5.03M
+TRAIN Source 3	5.29M
+TEST Source 1	1.73M
+TEST Source 2	4.89M
+TEST Source 3	5.08M
+
+A brute-force comparison across the TEST data would involve approximately 17.27 trillion potential comparisons.
+
+Candidate generation reduced this to approximately 51.81 million candidate pairs.
+
+🧠 Machine Learning
+
+The model uses 11 engineered features based on:
+
+Business name similarity
+Token-based name similarity
+Partial name similarity
+Address similarity
+Token-based address similarity
+Country matching
+Missing-value indicators
+Name and address length differences
+
+An XGBoost binary classifier is then used to distinguish between matching and non-matching entity pairs.
+
+Model
+XGBoost
+500 estimators
+Learning rate: 0.08
+Maximum depth: 7
+Histogram-based training
+Regularization
+Source-level validation split
+📈 Validation Results
+
+The comprehensive held-out validation produced:
+
+Metric	Result
+Precision	99.19%
+Recall	89.14%
+F0.5 Score	0.9700
+
+An earlier model-tuning experiment achieved a maximum validation F0.5 of 0.9776 under a different validation setup.
+
+These are offline validation results. The official hidden TEST leaderboard score is not available locally.
+
+🧪 Final TEST Inference
+
+The final pipeline processed 1,732,544 TEST Source 1 entities and scored approximately 48.59 million candidate pairs.
+
+Final output:
+
+50,283,577 predicted entity links
+1,732,503 Source 1 entities with matches
+41 Source 1 entities without a predicted match
+0 invalid target IDs
+0 duplicate Source 1 IDs
+🛠️ Tech Stack
+Python
+Pandas
+NumPy
+RapidFuzz
+Scikit-learn
+XGBoost
+
+
+📁 Project Structure
+Scalable-Entity-Resolution-XGBoost/
+│
+├── CODE/
+│   ├── Scrub.py
+│   ├── candidate_genaration.py
+│   ├── training_data_set_creation.py
+│   ├── XGBoost.py
+│   ├── final_inference.py
+│   └── validation scripts
+│
+├── output/
+│   ├── xgb_best_v2.json
+│   └── best_threshold_v2.txt
+│
+├── requirements.txt
+├── .gitignore
+└── README.md
+
+Large datasets and generated TSV files are intentionally excluded from the repository.
+
+🎯 Key Highlights
+Designed for large-scale entity resolution
+Multi-pass candidate retrieval instead of brute-force matching
+Fuzzy and token-based similarity features
+XGBoost-based classification
+Handles noisy business names and addresses
+Scalable processing across millions of records
+Output validation for duplicate and invalid entity IDs
