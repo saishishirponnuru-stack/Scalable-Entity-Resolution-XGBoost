@@ -1,0 +1,15 @@
+import pandas as pd
+from tabulate import tabulate
+gt = pd.read_csv('train//train_ground_truth.tsv', sep='\t')
+src1 = pd.read_csv('train//train_source1.tsv', sep='\t')
+src2 = pd.read_csv('train//train_source2.tsv', sep='\t')
+src3 = pd.read_csv('train//train_source3.tsv', sep='\t')
+gt = pd.DataFrame(gt)
+src1 = pd.DataFrame(src1)
+src2 = pd.DataFrame(src2)
+src3 = pd.DataFrame(src3)
+# print(tabulate(gt.head(), headers='keys', tablefmt='psql'))
+# print(tabulate(src1.head(), headers='keys', tablefmt='psql'))
+# print(tabulate(src2.head(), headers='keys', tablefmt='psql'))
+# print(tabulate(src3.head(), headers='keys', tablefmt='psql'))
+print(src1.shape[0])
