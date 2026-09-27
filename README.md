@@ -94,8 +94,8 @@ RapidFuzz
 Scikit-learn
 XGBoost
 
-
 📁 Project Structure
+
 Scalable-Entity-Resolution-XGBoost/
 │
 ├── CODE/
